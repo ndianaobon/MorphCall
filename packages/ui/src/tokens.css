@@ -1,0 +1,126 @@
+/*
+ * MorphCall design tokens (docs/06-design-system-ux.md §2).
+ * Values sampled from the Uizard mockup — provisional until the Uizard handoff export.
+ * Light is the :root default; `.dark` (set by next-themes) switches. Dark is the product default.
+ */
+
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-elevated: #f1f3f9;
+  --border: #e3e7ef;
+  --border-strong: #cbd2df;
+  --text: #0b1220;
+  --text-muted: #5a6477;
+  --text-subtle: #8a93a6;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --on-primary: #ffffff;
+  --ai: #0891b2;
+  --premium: #7c3aed;
+  --success: #16a34a;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --video-scrim: rgba(3, 6, 12, 0.55);
+  --shadow-float: 0 8px 32px rgba(15, 23, 42, 0.12);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #070b14;
+  --surface: #0b1220;
+  --card: #0f172a;
+  --card-elevated: #141d33;
+  --border: #1e293b;
+  --border-strong: #2b3752;
+  --text: #e7ebf3;
+  --text-muted: #8a94a8;
+  --text-subtle: #5d6780;
+  --primary: #5b5bf6;
+  --primary-hover: #6d6df8;
+  --on-primary: #ffffff;
+  --ai: #22d3ee;
+  --premium: #a78bfa;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --shadow-float: 0 8px 32px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-card-elevated: var(--card-elevated);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-ai: var(--ai);
+  --color-premium: var(--premium);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-float: var(--shadow-float);
+
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-h1: 32px;
+  --text-h1--line-height: 40px;
+  --text-h2: 24px;
+  --text-h2--line-height: 32px;
+  --text-h3: 18px;
+  --text-h3--line-height: 26px;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 22px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
