@@ -46,7 +46,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       code = STATUS_CODES[status] ?? (status >= 500 ? 'server_error' : 'validation_error');
-      message = exception.message;
+      const payload = exception.getResponse();
+      // Keep structured payloads (e.g. the health check's {status, db}) instead of "Http Exception".
+      if (typeof payload === 'object' && payload !== null) {
+        message = 'message' in payload ? String(payload.message) : exception.message;
+        details = payload;
+      } else {
+        message = String(payload);
+      }
     } else {
       this.logger.error(exception instanceof Error ? exception.stack : String(exception));
     }

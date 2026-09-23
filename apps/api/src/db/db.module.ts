@@ -20,7 +20,8 @@ export const SQL_CLIENT = Symbol('SQL_CLIENT');
           prepare: false,
           max: 10,
           idle_timeout: 20,
-          connect_timeout: 10,
+          // Generous: the pooler sits in another region and first connections can be slow.
+          connect_timeout: 30,
         }),
     },
     {

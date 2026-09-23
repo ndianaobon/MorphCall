@@ -66,6 +66,16 @@ pnpm typecheck && pnpm test && pnpm build
 
 CI (`.github/workflows/ci.yml`) runs format check, typecheck, tests (API tests against a Postgres service container) and a production build.
 
+## Troubleshooting
+
+**Every page except `/` returns 404 in development.** The dev server's route table is stale — usually
+after `next build` wrote into the same `.next` folder a running `next dev` was using. Stop the dev
+server, delete `apps/web/.next`, and start it again.
+
+**API starts but `/health` reports `degraded`.** The database was unreachable when the pool first
+connected (slow or dropped network). It recovers on the next request; check
+`psql "$DATABASE_URL" -c "select 1"` if it persists.
+
 ## Supabase configuration (one-time, in the dashboard)
 
 - **Auth → URL Configuration:** Site URL `http://localhost:3000`; add `http://localhost:3000/**` to Redirect URLs (and the production domain later).
