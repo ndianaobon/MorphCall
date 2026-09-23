@@ -2,17 +2,21 @@
 
 import {
   CalendarDays,
+  Flag,
   Lock,
   MessageCircle,
   MoreHorizontal,
   Pencil,
+  UserMinus,
   UserX,
-  Video,
 } from 'lucide-react';
 import Link from 'next/link';
 import { use, useState } from 'react';
-import { Tabs } from 'radix-ui';
+import { DropdownMenu, Tabs } from 'radix-ui';
 import { Avatar, Badge, Button, Card, EmptyState, ErrorState, Skeleton } from '@morphcall/ui';
+import { CallButton } from '@/components/calls/call-button';
+import { BlockDialog } from '@/components/safety/block-dialog';
+import { ReportDialog } from '@/components/safety/report-dialog';
 import { ComingSoonButton } from '@/components/social/coming-soon-button';
 import { FollowButton } from '@/components/social/follow-button';
 import { ProfileCardView } from '@/components/social/profile-card';
@@ -23,6 +27,8 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const { username } = use(params);
   const { data: p, error, isLoading, refetch } = useProfile(username);
   const [tab, setTab] = useState<'followers' | 'following'>('followers');
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   if (isLoading) return <ProfileSkeleton />;
   if (error) {
@@ -88,21 +94,38 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
                   <ComingSoonButton label="Message" when="coming soon" variant="secondary">
                     <MessageCircle aria-hidden /> Message
                   </ComingSoonButton>
-                  <ComingSoonButton
-                    label="Video call"
-                    when="coming in the next update"
-                    variant="secondary"
-                  >
-                    <Video aria-hidden /> Call
-                  </ComingSoonButton>
-                  <ComingSoonButton
-                    label="Block or report"
-                    when="coming in the next update"
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <MoreHorizontal aria-hidden />
-                  </ComingSoonButton>
+                  <CallButton userId={p.id} displayName={p.displayName} size="md" withLabel />
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`More options for ${p.displayName}`}
+                      >
+                        <MoreHorizontal aria-hidden />
+                      </Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        align="end"
+                        sideOffset={8}
+                        className="z-50 w-52 rounded-md border border-border bg-card p-1 shadow-float"
+                      >
+                        <DropdownMenu.Item
+                          className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-body-sm outline-none data-[highlighted]:bg-card-elevated"
+                          onSelect={() => setReportOpen(true)}
+                        >
+                          <Flag className="size-4 text-muted" aria-hidden /> Report
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-body-sm text-danger outline-none data-[highlighted]:bg-card-elevated"
+                          onSelect={() => setBlockOpen(true)}
+                        >
+                          <UserMinus className="size-4" aria-hidden /> Block
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 </>
               )}
             </div>
@@ -157,6 +180,17 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </div>
         </div>
       </Card>
+
+      <BlockDialog
+        open={blockOpen}
+        onOpenChange={setBlockOpen}
+        user={{ id: p.id, displayName: p.displayName }}
+      />
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        target={{ type: 'user', id: p.id, name: p.displayName }}
+      />
 
       {!p.restricted && (
         <Tabs.Root

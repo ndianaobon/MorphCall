@@ -25,7 +25,7 @@ export const NAV: NavItem[] = [
   { href: '/discover', label: 'Discover', icon: Compass },
   { href: '/live', label: 'Live', icon: Radio, soon: true },
   { href: '/messages', label: 'Messages', icon: MessageCircle, soon: true },
-  { href: '/calls', label: 'Calls', icon: Phone, soon: true },
+  { href: '/calls', label: 'Calls', icon: Phone },
   { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/premium', label: 'Premium', icon: Crown },
   { href: '/profile', label: 'Profile', icon: User },

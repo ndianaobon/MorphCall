@@ -7,3 +7,12 @@ export { Avatar, type AvatarProps } from './avatar';
 export { Skeleton, Spinner, EmptyState, ErrorState, type EmptyStateProps } from './feedback';
 export { Chip, OptionCards, type OptionCardsProps } from './choice';
 export { Logo, LogoMark } from './logo';
+export {
+  Dialog,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './dialog';

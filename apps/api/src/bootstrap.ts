@@ -25,6 +25,8 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.forRoot(env),
     createFastifyAdapter(env),
+    // LiveKit (and later payment) webhooks are verified against the exact bytes we received.
+    { rawBody: true },
   );
   await configureApp(app, env);
   return app;

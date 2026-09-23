@@ -1,10 +1,11 @@
 'use client';
 
-import { MessageCircle, Video } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import type { ProfileCard as Card } from '@morphcall/contracts';
 import { Avatar, Badge, Skeleton } from '@morphcall/ui';
 import { useInterests } from '@/lib/queries';
+import { CallButton } from '../calls/call-button';
 import { ComingSoonButton } from './coming-soon-button';
 import { FollowButton } from './follow-button';
 
@@ -53,14 +54,7 @@ export function ProfileCardView({ person }: { person: Card }) {
         <ComingSoonButton label="Message" when="coming soon" variant="secondary" size="icon-sm">
           <MessageCircle aria-hidden />
         </ComingSoonButton>
-        <ComingSoonButton
-          label="Video call"
-          when="coming in the next update"
-          variant="secondary"
-          size="icon-sm"
-        >
-          <Video aria-hidden />
-        </ComingSoonButton>
+        <CallButton userId={person.id} displayName={person.displayName} size="icon-sm" />
       </div>
     </article>
   );

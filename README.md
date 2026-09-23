@@ -6,14 +6,14 @@ Architecture, decisions and the staged roadmap live in [`docs/`](docs/README.md)
 
 ## Repository layout
 
-| Path | What it is |
-|------|------------|
-| `apps/web` | Next.js 16 (App Router, React 19, Tailwind v4): landing, auth, onboarding, app shell, discover, profiles, settings |
-| `apps/api` | NestJS 12 on Fastify: REST API; verifies Supabase JWTs (ES256 via JWKS); talks to Postgres as the least-privilege `morphcall_api` role |
-| `packages/contracts` | Zod schemas and types shared by the API and the web app |
-| `packages/ui` | Design system: tokens (light/dark) and React components |
-| `supabase/migrations` | SQL migrations, the source of truth for the database |
-| `docs/` | Architecture, API, security, design system, roadmap |
+| Path                  | What it is                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`            | Next.js 16 (App Router, React 19, Tailwind v4): landing, auth, onboarding, app shell, discover, profiles, settings                     |
+| `apps/api`            | NestJS 12 on Fastify: REST API; verifies Supabase JWTs (ES256 via JWKS); talks to Postgres as the least-privilege `morphcall_api` role |
+| `packages/contracts`  | Zod schemas and types shared by the API and the web app                                                                                |
+| `packages/ui`         | Design system: tokens (light/dark) and React components                                                                                |
+| `supabase/migrations` | SQL migrations, the source of truth for the database                                                                                   |
+| `docs/`               | Architecture, API, security, design system, roadmap                                                                                    |
 
 ## Prerequisites
 
@@ -39,6 +39,24 @@ pnpm --filter @morphcall/api dev
 ```bash
 pnpm --filter @morphcall/web dev
 ```
+
+## LiveKit (video server) for development
+
+Calls need a LiveKit server. Locally, run it in dev mode — no account required:
+
+```bash
+docker run --rm -p 7880:7880 -p 7881:7881 -p 50000-50100:50000-50100/udp livekit/livekit-server --dev --bind 0.0.0.0
+```
+
+Dev mode uses the key `devkey` and secret `secret`, which match `apps/api/.env.example`. Two browser
+windows on this machine can then call each other.
+
+For LiveKit to report join/leave events (which set call durations), point its webhooks at the API:
+run it with a config file containing `webhook: { api_key: devkey, urls: [http://host.docker.internal:4000/webhooks/livekit] }`.
+Without webhooks calls still work; the server falls back to its own end-of-call handling.
+
+Real devices on other networks need a hosted LiveKit project instead: set `LIVEKIT_URL`,
+`LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` in `apps/api/.env`.
 
 ## Checks
 

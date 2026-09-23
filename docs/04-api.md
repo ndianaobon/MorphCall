@@ -63,10 +63,10 @@ Sign-up, login, OAuth, email verification, password reset and MFA are handled by
 | POST `/calls/:id/decline` | participant | | |
 | POST `/calls/:id/cancel` | caller | Hang up while ringing | |
 | POST `/calls/:id/end` | participant | End an active call | Server also ends it from LiveKit webhooks |
-| POST `/calls/:id/quality` | participant | Client stats summary | |
+| POST `/calls/:id/quality` | participant | Client stats summary, stored per user on the call | |
 | GET `/calls/:id` | participant | Call summary (duration, AI features used, quality) | |
 | GET `/calls/history?filter=all\|missed\|incoming\|outgoing` | user | Call history | |
-| POST `/video/rooms/:roomId/token` | participant | Re-issue a token (reconnect after token expiry) | Short TTL (10 min) |
+| POST `/calls/:id/token` | participant | Re-issue a join token (reconnect / token expiry). `409 room_unavailable` once the call has ended | Short TTL (10 min) |
 | POST `/webhooks/livekit` | LiveKit (signed) | Participant/room/egress events | Verified with the LiveKit webhook signature; idempotent |
 
 Group calls (later) add `POST /calls {calleeIds[]}` and `POST /calls/:id/invite`, with no change to the room model.

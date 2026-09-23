@@ -12,6 +12,7 @@ const APP_PREFIXES = [
   '/calls',
   '/premium',
   '/onboarding',
+  '/call/',
 ];
 const AUTH_PAGES = ['/login', '/signup'];
 

@@ -40,6 +40,9 @@ export async function createHarness(): Promise<Harness> {
     SUPABASE_URL: 'http://supabase.test',
     DATABASE_URL: process.env.TEST_DATABASE_URL!,
     JWT_ISSUER: ISSUER,
+    LIVEKIT_URL: 'ws://livekit.test:7880',
+    LIVEKIT_API_KEY: 'testkey',
+    LIVEKIT_API_SECRET: 'test-secret-value-long-enough',
   };
 
   const moduleRef = await Test.createTestingModule({ imports: [AppModule.forRoot(env)] })
@@ -50,6 +53,8 @@ export async function createHarness(): Promise<Harness> {
     .compile();
   const app = moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter(env), {
     logger: false,
+    // Matches production: webhook signatures are checked against the raw bytes.
+    rawBody: true,
   });
   await configureApp(app, env);
   await app.init();
@@ -121,5 +126,8 @@ export async function onboardedUser(
   if (res.status !== 200) throw new Error(`profile failed: ${JSON.stringify(res.body)}`);
   const done = await h.request('POST', '/me/onboarding/complete', { token: user.token });
   if (done.status !== 200) throw new Error(`complete failed: ${JSON.stringify(done.body)}`);
+  // Test users accept calls from anyone unless a test changes it (the product default is
+  // "people who follow me", which would make most call tests fail for the wrong reason).
+  await h.request('PATCH', '/me/settings', { token: user.token, body: { whoCanCall: 'everyone' } });
   return user;
 }

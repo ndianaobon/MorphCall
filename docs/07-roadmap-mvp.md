@@ -52,6 +52,24 @@ Each stage ends with a working, deployed, demo-able vertical slice on staging. W
 - Client-side free effects: background blur.
 - **Exit:** two browsers on different networks complete a 30-minute call. p95 join time < 3 s. Glass-to-glass < 250 ms same-region (measured). Blocking mid-call ends the call. All error states in 06 §6 for calls are reachable and correct.
 
+**Status (2026-09-20): code complete, unverified against a live media server.**
+
+| Item | State |
+|------|-------|
+| Call lifecycle API (start, accept, decline, cancel, end, re-issue token, quality, history) with the state machine of 02 §1.3 | ✅ 13 end-to-end tests |
+| Authorization: blocks both ways, "who can call me", busy in either direction, participants-only access | ✅ tested |
+| Ring timeout → missed + notification, driven from the DB so it survives an API restart | ✅ tested (replaces the Redis delayed job until Redis exists) |
+| LiveKit tokens: per-room, 10-minute TTL, identity `u:<userId>`, reserved `ai-worker:` prefix | ✅ token claims asserted in tests |
+| LiveKit webhooks (join/leave/room_finished) with signature verification | ✅ signature rejection tested; live events need a running server |
+| Realtime gateway (socket.io): authenticated handshake, incoming-call push, call updates, presence heartbeat | ✅ runs; single-instance in-memory fan-out until Redis |
+| Block + report API, blocked list, block ends a live call and drops follows | ✅ tested |
+| Call screen: remote video, draggable self-view, auto-hiding controls, mic/camera/screen share, timer, connection quality, reconnecting overlay, permission states, call summary, keyboard shortcuts | ✅ builds; needs human testing |
+| Incoming-call dialog with generated ringtone; call buttons on profiles, cards and history; call history page with filters; block/report dialogs; blocked list in Settings | ✅ |
+| Premium AI Identity / Voice buttons in the call, locked with the D7 upgrade prompt | ✅ placeholder until Stage 5 |
+| **A real two-person call** | ⏳ blocked on a LiveKit server (Docker Desktop needs its first-run setup on this machine) |
+| Admin moderation queue (report triage, suspend/ban) | ⏳ not started |
+| Client-side background blur | ⏳ not started |
+
 ### Stage 3 — Premium subscriptions + payments (Paystack + Stripe)
 - Verify with both providers: merchant eligibility for this product category, recurring billing, currencies (NGN, USD), payouts (D1).
 - `PaymentProvider` interface + **Paystack and Stripe adapters**, `plan_prices` seeded per provider × currency, provider choice at checkout, webhooks → internal state machine (08 §4) → `subscription_events`, expiry sweeper, daily reconciliation, entitlement cache + `entitlements.updated`.

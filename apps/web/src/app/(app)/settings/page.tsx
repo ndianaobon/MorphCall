@@ -25,6 +25,7 @@ import {
   PROFILE_OPTIONS,
 } from '@/components/profile/privacy-options';
 import { UsernameField, type UsernameState } from '@/components/profile/username-field';
+import { BlockedUsersSection } from '@/components/settings/blocked-users';
 import { errorMessage } from '@/lib/api';
 import { env } from '@/lib/env';
 import { useMe, useUpdateProfile, useUpdateSettings } from '@/lib/queries';
@@ -42,6 +43,7 @@ export default function SettingsPage() {
       <ProfileSection me={me} />
       <PrivacySection settings={me.settings} />
       <AppearanceSection settings={me.settings} />
+      <BlockedUsersSection />
       <AccountSection me={me} />
     </div>
   );
