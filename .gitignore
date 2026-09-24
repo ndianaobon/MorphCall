@@ -1,6 +1,9 @@
 node_modules/
 dist/
 .next/
+# Alternate build dirs (NEXT_DIST_DIR). Must be ignored: Tailwind scans everything git
+# tracks, and minified build output yields garbage utility classes.
+.next-*/
 .turbo/
 coverage/
 *.tsbuildinfo

@@ -15,6 +15,7 @@ This folder is the design package requested in §27 of the project brief. Stage 
 | 06 | [Design system & UX architecture](06-design-system-ux.md) | Tokens from the MorphCall Uizard mockup, IA/navigation, video-call interaction model, state matrix |
 | 07 | [MVP scope & roadmap](07-roadmap-mvp.md) | MVP definition, staged plan with exit criteria, risks, open decisions (12) |
 | 08 | [Payments & subscriptions](08-payments.md) | Paystack + Stripe behind one interface, internal subscription state machine, webhooks (7) |
+| 09 | [Deployment](09-deployment.md) | Web on Vercel, API on Railway, environment variables, wiring Supabase and LiveKit to public domains (4) |
 
 ## Design inputs
 

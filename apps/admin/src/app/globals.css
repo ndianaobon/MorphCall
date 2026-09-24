@@ -1,7 +1,12 @@
-@import 'tailwindcss';
+/* source(none) turns off automatic file detection: left on, the scanner also reads build
+   output and dev logs, and minified or half-written bytes there become broken utility
+   classes that fail to parse. The two @source lines below are the only real sources. */
+@import 'tailwindcss' source(none);
 @import '@morphcall/ui/tokens.css';
 
-/* Scan the shared component package for class names. */
+/* This app's own source (globals.css sits in src/app, so '..' is src). */
+@source '..';
+/* The shared component package. */
 @source '../../../../packages/ui/src';
 
 @custom-variant dark (&:where(.dark, .dark *));

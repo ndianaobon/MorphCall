@@ -96,16 +96,25 @@ to mute. The call screen says so instead of failing quietly, but to actually use
   Use headphones, or the two windows echo.
 - **Phone on the LAN:** in Chrome on the phone open `chrome://flags/#unsafely-treat-insecure-origin-as-secure`,
   add `http://192.168.0.67:3000`, set the flag to Enabled and relaunch. Development only.
-- **Real devices properly:** put the web app _and_ the API behind HTTPS (a tunnel such as cloudflared
-  or ngrok gives both a public HTTPS URL). Serving the page over HTTPS while the API stays on plain
-  HTTP fails too — browsers block the mixed content — so both must move together, and
-  `NEXT_PUBLIC_API_URL` must point at the HTTPS API.
+- **Real devices properly:** deploy. Vercel for the web app and Railway for the API give both a real
+  HTTPS domain, which is the only way to test a genuine two-person call — see
+  [docs/09-deployment.md](docs/09-deployment.md). A tunnel (cloudflared, ngrok) works for a one-off
+  session. Serving the page over HTTPS while the API stays on plain HTTP fails too — browsers block
+  the mixed content — so both must move together, and `NEXT_PUBLIC_API_URL` must point at the HTTPS API.
+
+## Deployment
+
+`apps/web` deploys to Vercel and `apps/api` to Railway; Supabase and LiveKit Cloud are already
+hosted, and the admin app stays local. Config is committed (`railway.json`, `apps/web/vercel.json`);
+the dashboard steps, environment variables and the post-deploy call test are in
+[docs/09-deployment.md](docs/09-deployment.md).
 
 ## Troubleshooting
 
 **Every page except `/` returns 404 in development.** The dev server's route table is stale — usually
 after `next build` wrote into the same `.next` folder a running `next dev` was using. Stop the dev
-server, delete `apps/web/.next`, and start it again.
+server, delete `apps/web/.next`, and start it again. To build while a dev server is up, send the
+build elsewhere: `NEXT_DIST_DIR=.next-build pnpm --filter @morphcall/web build`.
 
 **API starts but `/health` reports `degraded`.** The database was unreachable when the pool first
 connected (slow or dropped network). It recovers on the next request; check

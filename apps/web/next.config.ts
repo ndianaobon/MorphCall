@@ -1,4 +1,11 @@
+import { networkInterfaces } from 'node:os';
 import type { NextConfig } from 'next';
+
+/** This machine's current wifi/LAN addresses, so a phone can open the dev server. */
+const localAddresses = Object.values(networkInterfaces())
+  .flat()
+  .filter((net) => net && net.family === 'IPv4' && !net.internal)
+  .map((net) => net!.address);
 
 const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
@@ -14,7 +21,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@morphcall/ui'],
-  allowedDevOrigins: ['192.168.0.67'],
+  // A production build run while `next dev` is up would otherwise overwrite the dev
+  // server's .next and leave every route 404 until it is deleted.
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
+  // Picked up fresh on each start, so a new DHCP lease doesn't break phone access.
+  allowedDevOrigins: localAddresses,
   images: {
     remotePatterns: supabaseHost
       ? [{ protocol: 'https', hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }]

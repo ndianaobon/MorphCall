@@ -34,8 +34,20 @@ export async function createApp(env: Env): Promise<NestFastifyApplication> {
 
 export async function configureApp(app: NestFastifyApplication, env: Env) {
   await app.register(helmet, { contentSecurityPolicy: false });
+
+  // Development is opened from several addresses — localhost, and a wifi address that changes
+  // whenever the router hands out a new lease — so allow private-network origins here.
+  // Production uses the explicit WEB_ORIGIN allowlist only.
+  const PRIVATE_ORIGIN =
+    /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\]|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/;
+  const allowed = new Set(env.WEB_ORIGIN);
+
   app.enableCors({
-    origin: env.WEB_ORIGIN,
+    origin:
+      env.NODE_ENV === 'production'
+        ? env.WEB_ORIGIN
+        : (origin, callback) =>
+            callback(null, !origin || allowed.has(origin) || PRIVATE_ORIGIN.test(origin)),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-Id', 'Idempotency-Key'],
     maxAge: 600,
