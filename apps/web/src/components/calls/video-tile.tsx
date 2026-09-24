@@ -1,11 +1,11 @@
 'use client';
 
-import { type Room, Track } from 'livekit-client';
-import { MicOff } from 'lucide-react';
+import type { LocalVideoTrack, Track } from 'livekit-client';
+import { MicOff, MonitorUp } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Avatar, cn } from '@morphcall/ui';
 
-/** Attaches a LiveKit track to a media element for as long as it is on screen. */
+/** Attaches a LiveKit track to a media element for as long as both exist. */
 function useAttached<T extends HTMLMediaElement>(track: Track | null | undefined) {
   const ref = useRef<T | null>(null);
   useEffect(() => {
@@ -26,6 +26,7 @@ export function RemoteTile({
   avatarUrl,
   cameraOn,
   micOn,
+  sharingScreen,
   className,
 }: {
   track: Track | null;
@@ -34,6 +35,7 @@ export function RemoteTile({
   avatarUrl: string | null;
   cameraOn: boolean;
   micOn: boolean;
+  sharingScreen?: boolean;
   className?: string;
 }) {
   const videoRef = useAttached<HTMLVideoElement>(track);
@@ -45,7 +47,12 @@ export function RemoteTile({
         ref={videoRef}
         autoPlay
         playsInline
-        className={cn('size-full object-cover', !cameraOn && 'hidden')}
+        className={cn(
+          'size-full',
+          // A shared screen must not be cropped; a camera feed should fill the stage.
+          sharingScreen ? 'object-contain' : 'object-cover',
+          !cameraOn && 'hidden',
+        )}
       />
       <audio ref={audioRef} autoPlay />
       {!cameraOn && (
@@ -54,42 +61,41 @@ export function RemoteTile({
           <p className="text-body text-white/70">{name}’s camera is off</p>
         </div>
       )}
-      {!micOn && (
-        <span className="absolute top-4 left-4 flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-caption text-white">
-          <MicOff className="size-3.5" aria-hidden /> Muted
-        </span>
-      )}
+      <div className="absolute top-4 left-4 flex gap-2">
+        {!micOn && (
+          <span className="flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-caption text-white">
+            <MicOff className="size-3.5" aria-hidden /> Muted
+          </span>
+        )}
+        {sharingScreen && (
+          <span className="flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-caption text-white">
+            <MonitorUp className="size-3.5" aria-hidden /> Sharing screen
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
-/** Your own camera, picture-in-picture. Drag it; it snaps to the nearest corner. */
+/** Your own camera, picture-in-picture. Drop it anywhere; it settles into the nearest corner. */
 export function LocalTile({
-  room,
+  track,
   name,
   cameraOn,
   micOn,
 }: {
-  room: Room | null;
+  track: LocalVideoTrack | null;
   name: string;
   cameraOn: boolean;
   micOn: boolean;
 }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // Attaching to the track itself (not a flag) means the preview appears as soon as it publishes.
+  const videoRef = useAttached<HTMLVideoElement>(track);
   const [corner, setCorner] = useState<{ x: 'left' | 'right'; y: 'top' | 'bottom' }>({
     x: 'right',
     y: 'bottom',
   });
-
-  useEffect(() => {
-    const el = videoRef.current;
-    const track = room?.localParticipant.getTrackPublication(Track.Source.Camera)?.track;
-    if (!el || !track) return;
-    track.attach(el);
-    return () => {
-      track.detach(el);
-    };
-  }, [room, cameraOn]);
+  const showVideo = cameraOn && Boolean(track);
 
   return (
     <div
@@ -98,7 +104,6 @@ export function LocalTile({
         corner.y === 'top' ? 'top-20' : 'bottom-28',
         corner.x === 'left' ? 'left-4' : 'right-4',
       )}
-      // Drop it anywhere; it settles into the nearest corner so it never covers the face.
       onPointerUp={(e) => {
         const { innerWidth, innerHeight } = window;
         setCorner({
@@ -113,9 +118,9 @@ export function LocalTile({
           autoPlay
           playsInline
           muted
-          className={cn('size-full -scale-x-100 object-cover', !cameraOn && 'hidden')}
+          className={cn('size-full -scale-x-100 object-cover', !showVideo && 'hidden')}
         />
-        {!cameraOn && (
+        {!showVideo && (
           <div className="flex size-full items-center justify-center">
             <Avatar name={name} size="sm" />
           </div>

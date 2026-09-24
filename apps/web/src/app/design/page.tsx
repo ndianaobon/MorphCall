@@ -17,6 +17,7 @@ import {
   Skeleton,
   Spinner,
 } from '@morphcall/ui';
+import { CallControls } from '@/components/calls/call-controls';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const COLORS = [
@@ -41,6 +42,9 @@ const COLORS = [
 export default function DesignPage() {
   const [chip, setChip] = useState(true);
   const [opt, setOpt] = useState<'a' | 'b'>('a');
+  const [mic, setMic] = useState(true);
+  const [cam, setCam] = useState(true);
+  const [sharing, setSharing] = useState(false);
   return (
     <main id="main" className="mx-auto flex max-w-5xl flex-col gap-10 px-4 py-10">
       <div className="flex items-center justify-between">
@@ -118,6 +122,31 @@ export default function DesignPage() {
           </Chip>
           <Chip>Gaming</Chip>
           <Chip disabled>Disabled</Chip>
+        </div>
+      </section>
+
+      {/* Call controls, on the dark stage they always sit on (docs/06 §5). */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-h2 font-bold">Call controls</h2>
+        <div className="relative h-56 overflow-hidden rounded-lg bg-[#03060c]">
+          <CallControls
+            micEnabled={mic}
+            cameraEnabled={cam}
+            screenSharing={sharing}
+            devices={{
+              cameras: [{ deviceId: 'cam1', label: 'FaceTime HD Camera' }],
+              microphones: [{ deviceId: 'mic1', label: 'Headset microphone' }],
+              speakers: [{ deviceId: 'spk1', label: 'Headphones' }],
+            }}
+            activeDevices={{ camera: 'cam1', microphone: 'mic1', speaker: 'spk1' }}
+            onToggleMic={() => setMic((v) => !v)}
+            onToggleCamera={() => setCam((v) => !v)}
+            onToggleScreenShare={() => setSharing((v) => !v)}
+            onSwitchDevice={() => {}}
+            onEnd={() => {}}
+            onPremiumFeature={() => {}}
+            visible
+          />
         </div>
       </section>
 

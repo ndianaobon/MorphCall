@@ -1,6 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AdminModule } from './admin/admin.module.js';
 import { AuthGuard } from './auth/auth.guard.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CallsModule } from './calls/calls.module.js';
@@ -29,6 +30,7 @@ export class AppModule {
         MeModule,
         CallsModule,
         SafetyModule,
+        AdminModule,
       ],
       controllers: [HealthController],
       providers: [

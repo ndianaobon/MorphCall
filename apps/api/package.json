@@ -8,7 +8,8 @@
     "dev": "concurrently -k -n tsc,api \"tsc -p tsconfig.build.json --watch --preserveWatchOutput\" \"node --watch --env-file-if-exists=.env dist/main.js\"",
     "start": "node --env-file-if-exists=.env dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "staff:grant": "node --env-file-if-exists=.env --experimental-strip-types scripts/grant-staff.ts"
   },
   "dependencies": {
     "@fastify/helmet": "^13.0.2",

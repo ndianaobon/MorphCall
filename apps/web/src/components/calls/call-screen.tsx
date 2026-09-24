@@ -10,6 +10,7 @@ import {
   Signal,
   SignalLow,
   SignalMedium,
+  VolumeX,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -84,6 +85,11 @@ export function CallScreen({ callId }: { callId: string }) {
     };
   }, [live, wake]);
 
+  /** Runs a device toggle and shows why it failed, rather than doing nothing. */
+  const runDevice = useCallback((action: () => Promise<void>) => {
+    void action().catch((err: unknown) => toast.error(errorMessage(err)));
+  }, []);
+
   const hangUp = useCallback(async () => {
     try {
       if (room.room) {
@@ -96,6 +102,12 @@ export function CallScreen({ callId }: { callId: string }) {
     }
   }, [callId, endCall, cancelCall, isCaller, status, room]);
 
+  // The other person closed their tab or hung up: end the call on this side too.
+  // In development LiveKit's webhooks can't reach localhost, so the client is the only signal.
+  useEffect(() => {
+    if (live && room.peerLeft) void hangUp();
+  }, [live, room.peerLeft, hangUp]);
+
   // Keyboard shortcuts.
   useEffect(() => {
     if (!live) return;
@@ -103,14 +115,14 @@ export function CallScreen({ callId }: { callId: string }) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       wake();
       const key = e.key.toLowerCase();
-      if (key === 'm') void room.toggleMic();
-      if (key === 'v') void room.toggleCamera();
-      if (key === 's') void room.toggleScreenShare();
+      if (key === 'm') runDevice(room.toggleMic);
+      if (key === 'v') runDevice(room.toggleCamera);
+      if (key === 's') runDevice(room.toggleScreenShare);
       if (key === 'escape') setPremiumTeaser(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [live, room, wake]);
+  }, [live, room, wake, runDevice]);
 
   if (error) {
     return (
@@ -166,6 +178,7 @@ export function CallScreen({ callId }: { callId: string }) {
           avatarUrl={call.peer.avatarUrl}
           cameraOn={room.peerCameraOn}
           micOn={room.peerMicOn}
+          sharingScreen={room.peerSharingScreen}
         />
       ) : (
         <RingingStage call={call} isCaller={Boolean(isCaller)} />
@@ -173,7 +186,7 @@ export function CallScreen({ callId }: { callId: string }) {
 
       {live && (
         <LocalTile
-          room={room.room}
+          track={room.localVideo}
           name={me.profile?.displayName ?? 'You'}
           cameraOn={room.cameraEnabled}
           micOn={room.micEnabled}
@@ -183,7 +196,7 @@ export function CallScreen({ callId }: { callId: string }) {
       {/* Top bar */}
       <div
         className={cn(
-          'absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 bg-gradient-to-b from-black/70 to-transparent px-4 py-3 transition-opacity duration-200',
+          'absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-2 bg-gradient-to-b from-black/70 to-transparent px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 transition-opacity duration-200 sm:gap-3 sm:px-4',
           controlsVisible || !live ? 'opacity-100' : 'opacity-0',
         )}
       >
@@ -201,9 +214,10 @@ export function CallScreen({ callId }: { callId: string }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {room.permission === 'denied' && (
+          {room.permission !== 'granted' && room.permission !== 'unknown' && (
             <Badge variant="warning">
-              <CameraOff aria-hidden /> No camera access
+              <CameraOff aria-hidden />
+              <span className="hidden sm:inline">No camera or mic</span>
             </Badge>
           )}
           {live && <QualityChip quality={room.quality} />}
@@ -224,6 +238,40 @@ export function CallScreen({ callId }: { callId: string }) {
         </div>
       )}
 
+      {live && room.permission === 'insecure' && (
+        <div className="absolute inset-x-4 top-20 z-40 mx-auto max-w-md rounded-md border border-warning/50 bg-warning/15 p-3 text-body-sm">
+          <p className="font-semibold">Camera and microphone are blocked here</p>
+          <p className="mt-1 text-white/80">
+            Browsers only allow them over a secure connection. This page is on{' '}
+            <code className="text-caption">
+              {typeof window !== 'undefined' ? window.location.host : ''}
+            </code>{' '}
+            over plain HTTP. Open MorphCall on <code className="text-caption">localhost</code> or
+            over HTTPS to use your camera. You can still see and hear the other person.
+          </p>
+        </div>
+      )}
+
+      {live && room.permission === 'denied' && (
+        <div className="absolute inset-x-4 top-20 z-40 mx-auto max-w-md rounded-md border border-warning/50 bg-warning/15 p-3 text-body-sm">
+          <p className="font-semibold">Camera and microphone access is blocked</p>
+          <p className="mt-1 text-white/80">
+            Allow them from the camera icon in your browser’s address bar, then press the mic or
+            camera button again.
+          </p>
+        </div>
+      )}
+
+      {live && room.audioBlocked && (
+        <div className="absolute inset-x-4 top-20 z-40 mx-auto flex max-w-md items-center gap-3 rounded-md border border-warning/50 bg-warning/15 p-3 text-body-sm">
+          <VolumeX className="size-5 shrink-0 text-warning" aria-hidden />
+          <span className="flex-1">Your browser blocked the call audio.</span>
+          <Button size="sm" onClick={() => void room.enableAudio()}>
+            Enable sound
+          </Button>
+        </div>
+      )}
+
       <PremiumTeaser feature={premiumTeaser} onClose={() => setPremiumTeaser(null)} />
 
       {live ? (
@@ -231,9 +279,13 @@ export function CallScreen({ callId }: { callId: string }) {
           micEnabled={room.micEnabled}
           cameraEnabled={room.cameraEnabled}
           screenSharing={room.screenSharing}
-          onToggleMic={() => void room.toggleMic()}
-          onToggleCamera={() => void room.toggleCamera()}
-          onToggleScreenShare={() => void room.toggleScreenShare()}
+          devices={room.devices}
+          activeDevices={room.activeDevices}
+          onSwitchDevice={(kind, id) => void room.switchDevice(kind, id)}
+          mediaBlocked={room.permission === 'insecure' || room.permission === 'unavailable'}
+          onToggleMic={() => runDevice(room.toggleMic)}
+          onToggleCamera={() => runDevice(room.toggleCamera)}
+          onToggleScreenShare={() => runDevice(room.toggleScreenShare)}
           onEnd={() => void hangUp()}
           onPremiumFeature={setPremiumTeaser}
           visible={controlsVisible}

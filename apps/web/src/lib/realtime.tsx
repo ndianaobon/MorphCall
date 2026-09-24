@@ -70,6 +70,8 @@ export function RealtimeProvider({
           current && current.id === event.callId && event.status !== 'ringing' ? null : current,
         );
         void qc.invalidateQueries({ queryKey: callKeys.history() });
+        // Refetch the call so fields the event doesn't carry (answeredAt, peer) stay correct.
+        void qc.invalidateQueries({ queryKey: callKeys.detail(event.callId) });
         qc.setQueryData<CallSummary>(callKeys.detail(event.callId), (old) =>
           old
             ? {

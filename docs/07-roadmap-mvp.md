@@ -66,8 +66,10 @@ Each stage ends with a working, deployed, demo-able vertical slice on staging. W
 | Call screen: remote video, draggable self-view, auto-hiding controls, mic/camera/screen share, timer, connection quality, reconnecting overlay, permission states, call summary, keyboard shortcuts | ✅ builds; needs human testing |
 | Incoming-call dialog with generated ringtone; call buttons on profiles, cards and history; call history page with filters; block/report dialogs; blocked list in Settings | ✅ |
 | Premium AI Identity / Voice buttons in the call, locked with the D7 upgrade prompt | ✅ placeholder until Stage 5 |
-| **A real two-person call** | ⏳ blocked on a LiveKit server (Docker Desktop needs its first-run setup on this machine) |
-| Admin moderation queue (report triage, suspend/ban) | ⏳ not started |
+| LiveKit media server | ✅ LiveKit Cloud project wired up and verified (credentials, room join). Docker/WSL on this machine could not start, so local `livekit-server` was abandoned |
+| Admin moderation queue: staff roles, report queue (urgent first), report detail with call metadata, warn / suspend / ban / unban / revoke-AI, people search, per-account record, append-only audit log, `staff:grant` CLI | ✅ 14 end-to-end tests. Separate app on port 3001 |
+| **A real two-person call** | ⏳ needs the product owner to test with two accounts |
+| Pre-join screen (check camera and mic before joining) | ⏳ not started |
 | Client-side background blur | ⏳ not started |
 
 ### Stage 3 — Premium subscriptions + payments (Paystack + Stripe)

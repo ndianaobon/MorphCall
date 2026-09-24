@@ -57,8 +57,12 @@ export function useCall(callId: string, enabled = true) {
     queryKey: callKeys.detail(callId),
     queryFn: () => api<CallSummary>(`/calls/${callId}`),
     enabled,
-    // Realtime drives this normally; polling while ringing covers a dropped socket.
-    refetchInterval: (query) => (query.state.data?.status === 'ringing' ? 2000 : false),
+    // Realtime drives this normally; polling covers a dropped socket or missed webhook.
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (status === 'ringing') return 2000;
+      return status === 'active' ? 10_000 : false;
+    },
   });
 }
 

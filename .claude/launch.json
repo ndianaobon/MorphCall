@@ -4,14 +4,32 @@
     {
       "name": "api",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@morphcall/api", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@morphcall/api",
+        "dev"
+      ],
       "port": 4000
     },
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@morphcall/web", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@morphcall/web",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@morphcall/admin",
+        "dev"
+      ],
+      "port": 3001
     }
   ]
 }
